@@ -6,19 +6,52 @@ import { API } from "./utils";
 import { TableRow } from "./components/TableRow";
 import { SideBar } from "./components/SideBar";
 
-const Patients = () => {
+const DoctorApplication = () => {
   const queryClient = useQueryClient();
-  async function getAllPatients() {
-    const { data } = await API.get("/users");
+
+  async function getAllDoctors() {
+    const { data } = await API.get("/doctors/pending/all");
     return data;
   }
 
-  const { data } = useQuery({
-    queryKey: ["patients"],
-    queryFn: getAllPatients,
+  const { data: doctorsData } = useQuery({
+    queryKey: ["pending_doctors"],
+    queryFn: getAllDoctors,
     cacheTime: 0,
     staleTime: 0,
   });
+
+  async function approveDoc(id) {
+    const data = await API.put(`/doctors/approve/${id}`);
+    return data;
+  }
+  const appproveMutation = useMutation({
+    mutationKey: ["approvedoc"],
+    mutationFn: approveDoc,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["pending_doctors"]);
+    },
+  });
+  async function declineDoc(id) {
+    const data = await API.put(`/doctors/decline/${id}`);
+    return data;
+  }
+
+  const declineMutation = useMutation({
+    mutationKey: ["approvedoc"],
+    mutationFn: declineDoc,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["pending_doctors"]);
+    },
+  });
+  const handleApprove = (docId) => {
+    appproveMutation.mutate(docId);
+  };
+  const handleDecline = (docId) => {
+    declineMutation.mutate(docId);
+  };
+
+  console.log("data from query", { doctorsData });
 
   return (
     <div className="grid gap-2 m-3">
@@ -31,6 +64,7 @@ const Patients = () => {
       </div>
       <div className="flex flex-row gap-2 ">
         <SideBar />
+
         <div className="w-full h-screen flex flex-col gap-2">
           <div className="rounded-md bg-[#DBDFF0] h-full">
             <div className="relative overflow-x-auto shadow-md sm:rounded-lg bg-[#DBDFF0]">
@@ -50,19 +84,30 @@ const Patients = () => {
                       scope="col"
                       className="px-6 py-3 bg-[#DBDFF0] text-gray-500 "
                     >
-                      Blood Group
+                      Email
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-gray-500">
+                      Specialization
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 bg-[#DBDFF0] text-gray-500"
+                    >
+                      Action
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {data?.data.map((item, index) => (
+                  {doctorsData?.data.map((item, index) => (
                     <TableRow
                       key={item._id}
                       id={item._id}
                       name={item.name}
                       gender={item.gender}
-                      date={item.bloodType}
-                      time={item.time}
+                      email={item.email}
+                      specialization={item.specialization || "-"}
+                      handleDecline={handleDecline}
+                      handleApprove={handleApprove}
                     />
                   ))}
                 </tbody>
@@ -75,4 +120,4 @@ const Patients = () => {
   );
 };
 
-export default Patients;
+export default DoctorApplication;

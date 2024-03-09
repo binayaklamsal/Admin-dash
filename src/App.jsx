@@ -1,16 +1,17 @@
 import React from "react";
 
 import MyRoutes from "./admin/routes/MyRoutes";
-import AdminLogin from "./admin/AdminLogin";
+import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 
+const queryClient = new QueryClient();
 const App = () => {
   return (
-    <div>
-      <MyRoutes />
-      {/* <AdminLogin/> */}
-
-
-    </div>
+    <QueryClientProvider client={queryClient}>
+      <div>
+        <MyRoutes />
+        {/* <AdminLogin /> */}
+      </div>
+    </QueryClientProvider>
   );
 };
 
