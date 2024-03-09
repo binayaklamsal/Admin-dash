@@ -27,7 +27,6 @@ const Patients = () => {
           <img className="h-[50px] px-2" src={Logo1} alt="" />
           <section></section>
         </div>
-        <div className="px-2">Logout avatar name </div>
       </div>
       <div className="flex flex-row gap-2 ">
         <SideBar />
